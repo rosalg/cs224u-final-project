@@ -4,14 +4,13 @@ from sklearn.naive_bayes import MultinomialNB
 
 class Baseline(Model):
     def __init__(self):
-        self.vectorizer = None
-        self.clf = None
+        self.vectorizer = TfidfVectorizer()
+        self.clf = MultinomialNB()
 
     def train(self, df : pd.DataFrame):
         corpus = df["Text"]
-        self.vectorizer = TfidfVectorizer()
         X = self.vectorizer.fit_transform(corpus)
-        self.clf = MultinomialNB().fit(X, df["Vote"])
+        self.clf = self.clf.fit(X, df["Vote"])
 
     def predict_votes(self, df : pd.DataFrame):
         new_corpus = df["Text"]

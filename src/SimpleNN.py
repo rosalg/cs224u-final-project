@@ -4,13 +4,14 @@ from sklearn.neural_network import MLPClassifier
 
 class SimpleNN(Model):
     def __init__(self):
-        self.vectorizer = None
+        self.vectorizer = TfidfVectorizer()
         self.clf = MLPClassifier(hidden_layer_sizes=(50, 10, 2), solver='adam', tol=1e-5)
 
     def train(self, df : pd.DataFrame):
         corpus = df["Text"]
-        self.vectorizer = TfidfVectorizer()
-        X = self.vectorizer.fit_transform(corpus)
+        tfidf = TfidfVectorizer().fit_transform(corpus).toarray()
+        punc = np.reshape(list(df["Punctuation"]), (len(df), -1))
+        X = np.concatenate((tfidf, punc), axis=1)
         self.clf = self.clf.fit(X, df["Vote"])
         print("nn fitted")
 
