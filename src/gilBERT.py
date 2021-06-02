@@ -92,3 +92,16 @@ def gilBERT():
         fit_hf_bert_classifier_with_hyperparameter_search,
         assess_dataframes=dev_df,
         vectorize=False)  # Pass in the BERT hidden state directly!
+    optimized_bert_classifier = bert_classifier_xval['model']
+
+    def fit_optimized_hf_bert_classifier(X, y):
+        optimized_bert_classifier.max_iter = 1000
+        optimized_bert_classifier.fit(X, y)
+        return optimized_bert_classifier
+
+    _ = sst.experiment(
+        train_df,
+        bert_fine_tune_phi,
+        fit_optimized_hf_bert_classifier,
+        assess_dataframes=test_df,
+        vectorize=False)
