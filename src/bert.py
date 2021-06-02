@@ -24,7 +24,7 @@ class Bert(Model):
         self.bert_model = BertModel.from_pretrained(weights_name)
 
     def bert_phi(self, text, test=False):
-        print(self.COUNT)
+        if (self.COUNT % 100 == 0): print(self.COUNT)
         self.COUNT += 1
         # print(df)
         # corpus = df["Text"]
@@ -61,12 +61,15 @@ class Bert(Model):
         return mod
 
     def train(self, df : pd.DataFrame, eval_df = None):
-        train_dataset = sst.build_dataset(self.transform_df(df), self.bert_phi, vectorize=False)
-        json.dump(train_dataset.tolist(), codecs.open("bert_train.json", 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4) ### this saves the array in .json format
-
-        # with open("bert_train.json", "w") as outfile: 
-        #     json.dump(train_dataset, outfile)
-        print("dataset built")
+        train_dataset = self.transform_df(df)
+        # train_dataset = sst.build_dataset(self.transform_df(df.head()), self.bert_phi, vectorize=False)
+        # print(type(train_dataset))
+        # json.dump(train_dataset.tolist(), codecs.open("bert_train.json", 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4) ### this saves the array in .json format
+        try: 
+            with open("bert_train.json", "w") as outfile: 
+                json.dump(train_dataset, outfile)
+        except: pass
+        # print("dataset built")
 
         # eval_dataset = sst.build_dataset(transform_df(eval_df), bert_phi, vectorize=False)
         val = sst.experiment(
@@ -80,6 +83,15 @@ class Bert(Model):
         self.clf = val
         return val
 
+    def predict_one_custom(self, text):
+        rnn_experiment = self.clf
+        feats = [rnn_experiment['phi'](text)]
+        preds = rnn_experiment['model'].predict(feats)
+        return preds[0]
+
     def predict_votes(self, df : pd.DataFrame):
-        preds = self.clf['model'].predict(sst.build_dataset(self.transform_df(df, test=True), self.bert_phi, vectorize=False))
-        return preds
+        new_df = self.transform_df(df, test=True)
+        new_df['prediction'] = new_df['sentence'].apply(self.predict_one_custom)
+        return list(new_df.prediction.values)
+        # preds = self.clf['model'].predict(self.transform_df(df, test=True))
+        # return preds
