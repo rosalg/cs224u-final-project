@@ -26,19 +26,19 @@ def convote2sst(dir):
     data = []
     i = 0
     for fn in file_names:
-        if i == 1000: break
+        if i == 50: break
         # Get metadata; https://www.cs.cornell.edu/home/llee/data/convote/README.v1.1.txt
         m = re.match(r"(?P<bill>\d\d\d)_(?P<speaker>\d\d\d\d\d\d)_"
                      + r"(?P<page_num>\d\d\d\d)(?P<speech_num>\d\d\d)_"
                      + r"(?P<party>\w)(?P<mentioned>\w)(?P<vote>\w)\.txt", fn)
         vote = m.group("vote")
         if vote == "Y":
-            vote = "positive"
+            vote = 1
         else:
-            vote = "negative"
+            vote = 0
         with open(dir + fn) as f:
             text = f.read()
-        data.append([i, " ".join(text.split()[:256]), vote])
+        data.append([i, text, vote])
         i += 1
 
     df = pd.DataFrame(np.array(data), columns=["example_id", "sentence", "label"])
