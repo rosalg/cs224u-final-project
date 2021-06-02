@@ -11,7 +11,7 @@ from SimpleNN import *
 from SimpleSVM import *
 
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--model', metavar='N', type=str, default="baseline", help='Model to run tests on.')
+parser.add_argument('--model', metavar='N', type=str, help='Model to run tests on.', required=True)
 parser.add_argument('--print_basic', type=bool, default=False, help="Print basic training data information.")
 
 CONVOTE_DATA_DIR = "../convote_v1.1/data_stage_one/"
