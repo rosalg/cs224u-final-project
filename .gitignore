@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Our ignores
+convote_v1.1/*
+.idea/*
+
 # C extensions
 *.so
 
