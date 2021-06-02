@@ -10,6 +10,7 @@ from sklearn.metrics import f1_score
 from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit
 import sys
 import os
+import re
 
 __author__ = "Christopher Potts"
 __version__ = "CS224u, Stanford, Spring 2021"
@@ -19,6 +20,24 @@ START_SYMBOL = "<s>"
 END_SYMBOL = "</s>"
 UNK_SYMBOL = "$UNK"
 
+
+def convote2sst(dir):
+    file_names = os.listdir(dir)
+    data = []
+    i = 0
+    for fn in file_names:
+        # Get metadata; https://www.cs.cornell.edu/home/llee/data/convote/README.v1.1.txt
+        m = re.match(r"(?P<bill>\d\d\d)_(?P<speaker>\d\d\d\d\d\d)_"
+                     + r"(?P<page_num>\d\d\d\d)(?P<speech_num>\d\d\d)_"
+                     + r"(?P<party>\w)(?P<mentioned>\w)(?P<vote>\w)\.txt", fn)
+        vote = m.group("vote")
+        with open(dir + fn) as f:
+            text = f.read()
+        data.append([i, text, vote])
+        i += 1
+
+    df = pd.DataFrame(np.array(data), columns=["example_id", "sentence", "label"])
+    return df
 
 def glove2dict(src_filename):
     """

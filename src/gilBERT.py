@@ -4,6 +4,8 @@ import torch.nn as nn
 from transformers import BertModel, BertTokenizer
 from torch_shallow_neural_classifier import TorchShallowNeuralClassifier
 import torch
+import utils
+import sst
 
 
 class HfBertClassifierModel(nn.Module):
@@ -53,3 +55,38 @@ class HfBertClassifier(TorchShallowNeuralClassifier):
             y = torch.tensor(y)
             dataset = torch.utils.data.TensorDataset(indices, mask, y)
         return dataset
+
+
+def bert_fine_tune_phi(text):
+    return text
+
+
+def fit_hf_bert_classifier_with_hyperparameter_search(X, y):
+    basemod = HfBertClassifier(
+        weights_name='bert-base-cased',
+        batch_size=8,  # Small batches to avoid memory overload.
+        max_iter=1,  # We'll search based on 1 iteration for efficiency.
+        n_iter_no_change=5,   # Early-stopping params are for the
+        early_stopping=True)  # final evaluation.
+
+    param_grid = {
+        'gradient_accumulation_steps': [1, 4, 8],
+        'eta': [0.00005, 0.0001, 0.001],
+        'hidden_dim': [100, 200, 300]}
+
+    bestmod = utils.fit_classifier_with_hyperparameter_search(
+        X, y, basemod, cv=3, param_grid=param_grid)
+
+    return bestmod
+
+def gilBERT():
+    train_df = utils.convote2sst('/convote_v1.1/data_stage_one/training_set')
+    print(train_df.head())
+    dev_df = utils.convote2sst('/convote_v1.1/data_stage_one/development_set')
+    test_df = utils.convote2sst('/convote_v1.1/data_stage_one/test_set')
+    bert_classifier_xval = sst.experiment(
+        train_df,
+        bert_fine_tune_phi,
+        fit_hf_bert_classifier_with_hyperparameter_search,
+        assess_dataframes=dev_df,
+        vectorize=False)  # Pass in the BERT hidden state directly!
