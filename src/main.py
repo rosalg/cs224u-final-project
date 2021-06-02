@@ -70,6 +70,7 @@ if __name__ == "__main__":
     testing_df = parse_convote_data(test_base_path)
 
     if args.model in BASELINES:
+        print("Running model: ", args.model)
         model = BASELINES[args.model]()
         if args.model != "gilbert":
             model.train(df)
