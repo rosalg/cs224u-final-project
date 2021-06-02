@@ -7,7 +7,7 @@ from sklearn.svm import LinearSVC
 class SimpleSVM(Model):
     def __init__(self):
         self.vectorizer = None
-        self.clf = make_pipeline(StandardScaler(), LinearSVC(random_state=0, tol=1e-5))
+        self.clf = make_pipeline(StandardScaler(with_mean=False), LinearSVC(random_state=0, tol=1e-5))
 
     def train(self, df : pd.DataFrame):
         corpus = df["Text"]

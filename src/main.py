@@ -68,14 +68,17 @@ if __name__ == "__main__":
     test_base_path = CONVOTE_DATA_DIR + "test_set/"
     testing_df = parse_convote_data(test_base_path)
 
-    model = BASELINES[args.model]()
-    model.train(df)
-    predicted = model.predict_votes(testing_df.drop("Vote", axis=1))
+    if args.model in BASELINES:
+        model = BASELINES[args.model]()
+        model.train(df)
+        predicted = model.predict_votes(testing_df.drop("Vote", axis=1))
 
-    num_corr = 0
-    num_tot = 0
-    assert (len(predicted) == len(testing_df["Vote"]))
-    for i in range(len(predicted)):
-        num_tot += 1
-        if predicted[i] == testing_df["Vote"][i]: num_corr += 1
-    print("Accuracy of", args.model, ":",num_corr / num_tot)
+        num_corr = 0
+        num_tot = 0
+        assert (len(predicted) == len(testing_df["Vote"]))
+        for i in range(len(predicted)):
+            num_tot += 1
+            if predicted[i] == testing_df["Vote"][i]: num_corr += 1
+        print("Accuracy of", args.model, ":",num_corr / num_tot)
+    else:
+        print("Please choose one of the valid baselines to run: ", BASELINES.keys())
