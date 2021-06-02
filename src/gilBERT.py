@@ -80,10 +80,12 @@ def fit_hf_bert_classifier_with_hyperparameter_search(X, y):
     return bestmod
 
 def gilBERT():
+    print("Starting gilBERT")
     train_df = utils.convote2sst('/convote_v1.1/data_stage_one/training_set')
     print(train_df.head())
     dev_df = utils.convote2sst('/convote_v1.1/data_stage_one/development_set')
     test_df = utils.convote2sst('/convote_v1.1/data_stage_one/test_set')
+    print("Finished initializing dataframes")
     bert_classifier_xval = sst.experiment(
         train_df,
         bert_fine_tune_phi,
