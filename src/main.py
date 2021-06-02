@@ -10,10 +10,12 @@ from Baseline import *
 from SimpleNN import *
 from SimpleSVM import *
 
-CONVOTE_DATA_DIR = "../convote_v1.1/data_stage_one/"
 parser = argparse.ArgumentParser(description='Process some integers.')
-parser.add_argument('--mode', metavar='N', type=str, default="training",
-                    help='Mode to run the model, default=training')
+parser.add_argument('--model', metavar='N', type=str, default="baseline", help='Model to run tests on.')
+parser.add_argument('--print_basic', type=bool, default=False, help="Print basic training data information.")
+
+CONVOTE_DATA_DIR = "../convote_v1.1/data_stage_one/"
+BASELINES = {"baseline": Baseline, "simple_nn": SimpleNN, "simple_svm": SimpleSVM}
 
 def parse_convote_data(base_path):
     file_names = os.listdir(base_path)
@@ -48,27 +50,25 @@ def parse_convote_data(base_path):
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    print(args.mode)
-    base_path = CONVOTE_DATA_DIR + args.mode + "_set/"
+    base_path = CONVOTE_DATA_DIR + "training_set/"
     df = parse_convote_data(base_path)
-    print(df.head())
-    print(len(df))
+    if args.print_basic:
+        print(df.head())
+        print(len(df))
 
-    unique_bills = np.unique(df["Bill number"])
-    print("Number of debates:", len(unique_bills))
-    for ub in unique_bills[:3]:
-        print("Bill #:", ub)
-        speeches = df[df["Bill number"] == ub]
-        print("# of speeches:", len(speeches))
-        unique_speakers = np.unique(speeches["Speaker"])
-        print("# of speakers:", len(unique_speakers))
+        unique_bills = np.unique(df["Bill number"])
+        print("Number of debates:", len(unique_bills))
+        for ub in unique_bills[:3]:
+            print("Bill #:", ub)
+            speeches = df[df["Bill number"] == ub]
+            print("# of speeches:", len(speeches))
+            unique_speakers = np.unique(speeches["Speaker"])
+            print("# of speakers:", len(unique_speakers))
 
-    mode = input("Next mode?: ")
-    new_base_path = CONVOTE_DATA_DIR + mode + "_set/"
-    testing_df = parse_convote_data(new_base_path)
-    testing_df.head()
+    test_base_path = CONVOTE_DATA_DIR + "test_set/"
+    testing_df = parse_convote_data(test_base_path)
 
-    model = Baseline()
+    model = BASELINES[args.model]()
     model.train(df)
     predicted = model.predict_votes(testing_df.drop("Vote", axis=1))
 
@@ -78,4 +78,4 @@ if __name__ == "__main__":
     for i in range(len(predicted)):
         num_tot += 1
         if predicted[i] == testing_df["Vote"][i]: num_corr += 1
-    print("Accuracy of SimpleNN:", num_corr / num_tot)
+    print("Accuracy of", args.model, ":",num_corr / num_tot)
