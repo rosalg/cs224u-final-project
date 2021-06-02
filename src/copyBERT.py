@@ -83,37 +83,76 @@ def fit_hf_bert_classifier_with_hyperparameter_search(X, y):
 
     return bestmod
 
-def gilBERT():
-    print("Starting gilBERT")
+from transformers import DistilBertTokenizerFast
+from datasets import load_dataset, load_metric
+from transformers import DistilBertForSequenceClassification, Trainer, TrainingArguments
+
+class ConvoteDataset(torch.utils.data.Dataset):
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
+        self.labels = labels
+
+    def __getitem__(self, idx):
+        item = {key: torch.tensor(val[idx]) for key, val in self.encodings.items()}
+        item['labels'] = torch.tensor(int(self.labels[idx]))
+        return item
+
+    def __len__(self):
+        return len(self.labels)
+
+def copyBERT():
+    print("Starting copybert")
     train_df = utils.convote2sst('../convote_v1.1/data_stage_one/training_set/')
-    print(train_df.head())
     dev_df = utils.convote2sst('../convote_v1.1/data_stage_one/development_set/')
     test_df = utils.convote2sst('../convote_v1.1/data_stage_one/test_set/')
-    print("Finished initializing dataframes")
-    bert_classifier_xval = sst.experiment(
-        train_df,
-        bert_fine_tune_phi,
-        fit_hf_bert_classifier_with_hyperparameter_search,
-        assess_dataframes=dev_df,
-        vectorize=False,
-        verbose=True)  # Pass in the BERT hidden state directly!
-    print("Predictions:", bert_classifier_xval['predictions'])
-    print("Finished initial train")
-    optimized_bert_classifier = bert_classifier_xval['model']
 
-    def fit_optimized_hf_bert_classifier(X, y):
-        optimized_bert_classifier.max_iter = 1000
-        optimized_bert_classifier.fit(X, y)
-        return optimized_bert_classifier
+    train_labels = list(train_df['label'])
+    train_texts = list(train_df['sentence'])
+    val_labels = list(dev_df['label'])
+    val_texts = list(dev_df['sentence'])
+    test_labels = list(test_df['label'])
+    test_texts = list(test_df['sentence'])
 
-    print("Starting final test")
-    _ = sst.experiment(
-        train_df,
-        bert_fine_tune_phi,
-        fit_optimized_hf_bert_classifier,
-        assess_dataframes=test_df,
-        vectorize=False,
-	    verbose=True)
-    print("Score: ")
-    print(_["scores"])
-    print("Done")
+    tokenizer = DistilBertTokenizerFast.from_pretrained("distilbert-base-uncased")
+
+    train_encodings = tokenizer(train_texts, truncation=True, padding=True)
+    val_encodings = tokenizer(val_texts, truncation=True, padding=True)
+    test_encodings = tokenizer(test_texts, truncation=True, padding=True)
+
+    train_dataset = ConvoteDataset(train_encodings, train_labels)
+    val_dataset = ConvoteDataset(val_encodings, val_labels)
+    test_dataset = ConvoteDataset(test_encodings, test_labels)
+
+    training_args = TrainingArguments(
+        output_dir='./results',
+        num_train_epochs=3,
+        per_device_train_batch_size=16,
+        per_device_eval_batch_size=64,
+        warmup_steps=500,
+        weight_decay=0.01,
+        logging_dir='./logs',
+        logging_steps=10,
+    )
+    metric = load_metric("accuracy")
+
+    def compute_metrics(eval_pred):
+        logits, labels = eval_pred
+        predictions = np.argmax(logits, axis=-1)
+        return metric.compute(predictions=predictions, references=labels)
+
+
+    model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=2)
+
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=val_dataset,
+        compute_metrics=compute_metrics
+    )
+
+    trainer.train()
+    preds, label_ids, metrics = trainer.predict(test_dataset)
+    print("PREDS:", preds)
+    print("Label_ids", label_ids)
+    print("METRICS:", metrics)
