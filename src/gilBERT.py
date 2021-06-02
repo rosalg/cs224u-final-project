@@ -69,11 +69,14 @@ def fit_hf_bert_classifier_with_hyperparameter_search(X, y):
         n_iter_no_change=5,   # Early-stopping params are for the
         early_stopping=True)  # final evaluation.
 
+    '''
     param_grid = {
         'gradient_accumulation_steps': [1, 4, 8],
         'eta': [0.00005, 0.0001, 0.001],
         'hidden_dim': [100, 200, 300]}
+    '''
 
+    param_grid = {'gradient_accumulation_steps': [1], 'eta': [0.0001], 'hidden_dim': [100, 200, 300]}
     bestmod = utils.fit_classifier_with_hyperparameter_search(
         X, y, basemod, cv=3, param_grid=param_grid)
 
@@ -81,10 +84,10 @@ def fit_hf_bert_classifier_with_hyperparameter_search(X, y):
 
 def gilBERT():
     print("Starting gilBERT")
-    train_df = utils.convote2sst('/convote_v1.1/data_stage_one/training_set')
+    train_df = utils.convote2sst('../convote_v1.1/data_stage_one/training_set/')
     print(train_df.head())
-    dev_df = utils.convote2sst('/convote_v1.1/data_stage_one/development_set')
-    test_df = utils.convote2sst('/convote_v1.1/data_stage_one/test_set')
+    dev_df = utils.convote2sst('../convote_v1.1/data_stage_one/development_set/')
+    test_df = utils.convote2sst('../convote_v1.1/data_stage_one/test_set/')
     print("Finished initializing dataframes")
     bert_classifier_xval = sst.experiment(
         train_df,
@@ -107,7 +110,7 @@ def gilBERT():
         fit_optimized_hf_bert_classifier,
         assess_dataframes=test_df,
         vectorize=False,
-	verbose=True)
+	    verbose=True)
     print("Score: ")
-    print(_["score"])
+    print(_["scores"])
     print("Done")
