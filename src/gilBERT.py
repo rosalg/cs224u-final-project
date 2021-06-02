@@ -102,4 +102,7 @@ def gilBERT():
         bert_fine_tune_phi,
         fit_optimized_hf_bert_classifier,
         assess_dataframes=test_df,
-        vectorize=False)
+        vectorize=False,
+        verbose=True)
+    print("Score: ")
+    print(_['score'])
