@@ -25,19 +25,8 @@ class Bert(Model):
         self.bert_model = BertModel.from_pretrained(weights_name)
 
     def bert_phi(self, text, test=False):
-        if (self.COUNT % 100 == 0): print(self.COUNT)
-        self.COUNT += 1
-        # print(df)
-        # corpus = df["Text"]
-        # if test:
-        #     tfidf = self.vectorizer.transform(corpus).toarray()
-        # else:
-        #     tfidf = self.vectorizer.fit_transform(corpus).toarray()
-            
-        # punc = np.reshape(list(df["Punctuation"]), (len(df), -1))
-        # X = np.concatenate((tfidf, punc), axis=1)
-        # print(X)
-        input_ids = self.bert_tokenizer.encode(text, add_special_tokens=True, truncation = True)
+        input_ids = self.bert_tokenizer.encode(text, add_special_tokens=False, truncation = True)
+        print(input_ids[:2])
         Ids = torch.tensor([input_ids])
         with torch.no_grad():
             reps = self.bert_model(Ids)
