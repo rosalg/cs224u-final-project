@@ -8,6 +8,7 @@ from sklearn.preprocessing import StandardScaler
 from Model import *
 from Baseline import *
 from SimpleNN import *
+from bert import *
 from SimpleSVM import *
 from gilBERT import *
 from copyBERT import *
@@ -17,7 +18,7 @@ parser.add_argument('--model', metavar='N', type=str, help='Model to run tests o
 parser.add_argument('--print_basic', type=bool, default=False, help="Print basic training data information.")
 
 CONVOTE_DATA_DIR = "../convote_v1.1/data_stage_one/"
-BASELINES = {"baseline": Baseline, "simple_nn": SimpleNN, "simple_svm": SimpleSVM, "gilbert": gilBERT, "copybert": copyBERT}
+BASELINES = {"baseline": Baseline, "simple_nn": SimpleNN, "simple_svm": SimpleSVM, "gilbert": gilBERT, "bert" : Bert, "copybert": copyBERT}
 
 def parse_convote_data(base_path):
     file_names = os.listdir(base_path)

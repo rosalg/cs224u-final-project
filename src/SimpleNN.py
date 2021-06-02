@@ -14,7 +14,9 @@ class SimpleNN(Model):
         else:
             tfidf = self.vectorizer.fit_transform(corpus).toarray()
         punc = np.reshape(list(df["Punctuation"]), (len(df), -1))
-        X = np.concatenate((tfidf, punc), axis=1)
+        # unigrams = np.reshape(list(df["Unigrams"]), (len(df), -1))
+        bigrams = np.reshape(list(df["Bigrams"]), (len(df), -1))
+        X = np.concatenate((tfidf, punc, bigrams), axis=1)
         return X
 
     def train(self, df : pd.DataFrame):
