@@ -12,6 +12,7 @@ from torch_rnn_classifier import TorchRNNModel
 from torch_rnn_classifier import TorchRNNClassifier
 from torch_rnn_classifier import TorchRNNClassifierModel
 import json
+import utils
 
 
 class Bert(Model):
@@ -24,19 +25,8 @@ class Bert(Model):
         self.bert_model = BertModel.from_pretrained(weights_name)
 
     def bert_phi(self, text, test=False):
-        if (self.COUNT % 100 == 0): print(self.COUNT)
-        self.COUNT += 1
-        # print(df)
-        # corpus = df["Text"]
-        # if test:
-        #     tfidf = self.vectorizer.transform(corpus).toarray()
-        # else:
-        #     tfidf = self.vectorizer.fit_transform(corpus).toarray()
-            
-        # punc = np.reshape(list(df["Punctuation"]), (len(df), -1))
-        # X = np.concatenate((tfidf, punc), axis=1)
-        # print(X)
-        input_ids = self.bert_tokenizer.encode(text, add_special_tokens=True, truncation = True)
+        input_ids = self.bert_tokenizer.encode(text, add_special_tokens=False, truncation = True)
+        print(input_ids[:2])
         Ids = torch.tensor([input_ids])
         with torch.no_grad():
             reps = self.bert_model(Ids)
@@ -61,23 +51,26 @@ class Bert(Model):
         return mod
 
     def train(self, df : pd.DataFrame, eval_df = None):
-        train_dataset = self.transform_df(df)
+        train_df = utils.convote2sst('../convote_v1.1/data_stage_one/training_set/').head(20)
+        # print(train_df.head())
+        dev_df = utils.convote2sst('../convote_v1.1/data_stage_one/development_set/').head(20)
+        train_dataset = self.transform_df(df.head(20))
         # train_dataset = sst.build_dataset(self.transform_df(df.head()), self.bert_phi, vectorize=False)
         # print(type(train_dataset))
         # json.dump(train_dataset.tolist(), codecs.open("bert_train.json", 'w', encoding='utf-8'), separators=(',', ':'), sort_keys=True, indent=4) ### this saves the array in .json format
-        try: 
-            with open("bert_train.json", "w") as outfile: 
-                json.dump(train_dataset, outfile)
-        except: pass
+        # try: 
+        #     with open("bert_train.json", "w") as outfile: 
+        #         json.dump(train_dataset, outfile)
+        # except: pass
         # print("dataset built")
 
         # eval_dataset = sst.build_dataset(transform_df(eval_df), bert_phi, vectorize=False)
         val = sst.experiment(
-            train_dataset, #train set
+            train_df, #train set
             self.bert_phi, #bert_phi
             self.get_model, #get_model
             # assess_dataframes=[eval_dataset], #eval set
-            assess_dataframes = None,
+            assess_dataframes = dev_df,
             vectorize=False,
         )
         self.clf = val
@@ -90,8 +83,10 @@ class Bert(Model):
         return preds[0]
 
     def predict_votes(self, df : pd.DataFrame):
-        new_df = self.transform_df(df, test=True)
-        new_df['prediction'] = new_df['sentence'].apply(self.predict_one_custom)
-        return list(new_df.prediction.values)
+        test_df = utils.convote2sst('../convote_v1.1/data_stage_one/test_set/').head(20)
+        # new_df = self.transform_df(df.head(20), test=True)
+        test_df['prediction'] = test_df['sentence'].apply(self.predict_one_custom)
+        # print(new_df['prediction'])
+        return list(test_df.prediction.values)
         # preds = self.clf['model'].predict(self.transform_df(df, test=True))
         # return preds
