@@ -26,7 +26,6 @@ def convote2sst(dir):
     data = []
     i = 0
     for fn in file_names:
-        if i == 50: break
         # Get metadata; https://www.cs.cornell.edu/home/llee/data/convote/README.v1.1.txt
         m = re.match(r"(?P<bill>\d\d\d)_(?P<speaker>\d\d\d\d\d\d)_"
                      + r"(?P<page_num>\d\d\d\d)(?P<speech_num>\d\d\d)_"
