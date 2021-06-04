@@ -31,10 +31,6 @@ def convote2sst(dir):
                      + r"(?P<page_num>\d\d\d\d)(?P<speech_num>\d\d\d)_"
                      + r"(?P<party>\w)(?P<mentioned>\w)(?P<vote>\w)\.txt", fn)
         vote = m.group("vote")
-        if vote == "Y":
-            vote = 1
-        else:
-            vote = 0
         with open(dir + fn) as f:
             text = f.read()
         data.append([i, text, vote])

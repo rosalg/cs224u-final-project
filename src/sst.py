@@ -140,6 +140,7 @@ def build_dataset(dataframes, phi, vectorizer=None, vectorize=True):
         df = pd.concat(dataframes)
     else:
         df = dataframes
+
     raw_examples = list(df.sentence.values)
 
     feat_dicts = list(df.sentence.apply(phi).values)
