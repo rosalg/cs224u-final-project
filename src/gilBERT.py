@@ -80,14 +80,15 @@ def gilBERT():
     devFile=open('dev_preds.txt','w')
 
     for element in dev_preds:
-        devFile.write(element)
+        devFile.write(str(element))
         devFile.write('\n')
     devFile.close()
+    print("DEV_METRICS:", dev_metrics)
 
     testFile=open('test_preds.txt','w')
 
     for element in test_preds:
-        testFile.write(element)
+        testFile.write(str(element))
         testFile.write('\n')
     testFile.close()
     print("PREDS:", test_preds)
