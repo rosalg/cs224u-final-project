@@ -74,6 +74,14 @@ def gilBERT():
 
     trainer.train()
     preds, label_ids, metrics = trainer.predict(test_dataset)
+
+    MyList = preds
+    MyFile=open('output.txt','w')
+
+    for element in MyList:
+        MyFile.write(element)
+        MyFile.write('\n')
+    MyFile.close()
     print("PREDS:", preds)
     print("Label_ids", label_ids)
     print("METRICS:", metrics)
