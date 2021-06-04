@@ -90,6 +90,6 @@ def gilBERT():
         testFile.write(element)
         testFile.write('\n')
     testFile.close()
-    print("PREDS:", preds)
+    print("PREDS:", test_preds)
     print("Label_ids", label_ids)
     print("METRICS:", metrics)
